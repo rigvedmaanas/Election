@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, Link } from "@heroui/react";
+import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import { HeroSelect } from "@/components/HeroSelect";
 import { schoolClasses } from "@/lib/classes";
 import { FormEvent, useRef, useState } from "react";
@@ -72,6 +73,7 @@ export default function CandidatesPage() {
           <Link href="/admin">
             <Button variant="secondary">Dashboard</Button>
           </Link>
+          <AdminLogoutButton />
         </div>
 
         <Card className="max-w-2xl">

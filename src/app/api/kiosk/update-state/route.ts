@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isAdminRequest, unauthorizedResponse } from "@/lib/adminAuth";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -21,6 +22,10 @@ export async function POST(request: Request) {
         { error: "A class must be selected before unlocking." },
         { status: 400 },
       );
+    }
+
+    if (status === "UNLOCKED" && !isAdminRequest(request)) {
+      return unauthorizedResponse();
     }
 
     const state = await prisma.kioskState.upsert({

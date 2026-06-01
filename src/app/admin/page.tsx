@@ -8,6 +8,7 @@ import {
 import { HeroSelect } from "@/components/HeroSelect";
 import { schoolClasses } from "@/lib/classes";
 import { useState } from "react";
+import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 
 export default function AdminPage() {
   const [selectedClass, setSelectedClass] = useState("Class 9A");
@@ -66,6 +67,7 @@ export default function AdminPage() {
           <Link href="/admin/results">
             <Button variant="outline">Results</Button>
           </Link>
+          <AdminLogoutButton />
         </div>
 
         <Card className="max-w-2xl">

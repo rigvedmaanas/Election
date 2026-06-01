@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, Link } from "@heroui/react";
+import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import { HeroSelect } from "@/components/HeroSelect";
 import { useEffect, useMemo, useState } from "react";
 
@@ -122,6 +123,7 @@ export default function ResultsPage() {
             <Link href="/admin">
               <Button variant="secondary">Dashboard</Button>
             </Link>
+            <AdminLogoutButton />
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "School Election System",
+  title: "Rajagiri Election System",
   description: "Offline localhost election kiosk and admin panel",
 };
 
