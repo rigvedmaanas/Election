@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./election.db"
+}
+
+model KioskState {
+  id           Int     @id @default(1)
+  status       String  @default("LOCKED") // "LOCKED" or "UNLOCKED"
+  active_class String? // e.g., "Class 9A"
+}
+
+model Candidate {
+  id         Int    @id @default(autoincrement())
+  name       String
+  class_name String
+  gender     String // "Male" or "Female"
+  image_path String // e.g., "/uploads/alice.jpg"
+}
+
+model EncryptedVote {
+  id                      Int      @id @default(autoincrement())
+  class_name              String
+  encrypted_ballot_string String   // Stored as "IV : Ciphertext : AuthTag"
+}

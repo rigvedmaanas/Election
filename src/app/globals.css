@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@source "../";
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f6f4ef;
+  color: #171717;
+}
+
+.kiosk-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
