@@ -1,7 +1,30 @@
 # Installation
 
+## install node
+
+# Download and install nvm:
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+
+# in lieu of restarting the shell
+
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+
+nvm install 24
+
+# Verify the Node.js version:
+
+node -v # Should print "v24.16.0".
+
+# Verify npm version:
+
+npm -v # Should print "11.13.0".
+
 1. Download
 2. create .env
+
 ```
 DATABASE_URL="file:./election.db"
 VOTE_ENCRYPTION_SECRET="12345678901234567890123456789012"
@@ -21,10 +44,11 @@ pwd2
 4. `npm run dev`
 
 ## Erase database
+
 That clears all candidates and votes, and locks the kiosk.
 
-```sqlite3 prisma/election.db "DELETE FROM EncryptedVote; DELETE FROM Candidate; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"```
+`sqlite3 prisma/election.db "DELETE FROM EncryptedVote; DELETE FROM Candidate; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"`
 
 If you only want to clear votes/results but keep candidates:
 
-```sqlite3 prisma/election.db "DELETE FROM EncryptedVote; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"```
+`sqlite3 prisma/election.db "DELETE FROM EncryptedVote; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"`
