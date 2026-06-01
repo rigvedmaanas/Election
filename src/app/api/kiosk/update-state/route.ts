@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { isAdminRequest, unauthorizedResponse } from "@/lib/adminAuth";
+import { writeAuditLog } from "@/lib/auditLog";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     }
 
     if (status === "UNLOCKED" && !isAdminRequest(request)) {
+      await writeAuditLog("kiosk_unlock_blocked", { active_class: activeClass });
       return unauthorizedResponse();
     }
 
@@ -41,9 +43,14 @@ export async function POST(request: Request) {
       },
     });
 
+    await writeAuditLog(status === "UNLOCKED" ? "kiosk_unlocked" : "kiosk_locked", {
+      active_class: state.active_class,
+    });
+
     return NextResponse.json({ state });
   } catch (error) {
     console.error(error);
+    await writeAuditLog("kiosk_state_update_failed");
     return NextResponse.json(
       { error: "Could not update kiosk state." },
       { status: 500 },

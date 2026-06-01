@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { writeAuditLog } from "@/lib/auditLog";
 import { mkdir, writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import path from "path";
@@ -59,9 +60,17 @@ export async function POST(request: Request) {
       },
     });
 
+    await writeAuditLog("candidate_created", {
+      candidate_id: candidate.id,
+      name: candidate.name,
+      class_name: candidate.class_name,
+      gender: candidate.gender,
+    });
+
     return NextResponse.json({ candidate }, { status: 201 });
   } catch (error) {
     console.error(error);
+    await writeAuditLog("candidate_create_failed");
     return NextResponse.json(
       { error: "Could not create candidate." },
       { status: 500 },

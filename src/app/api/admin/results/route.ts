@@ -1,4 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import {
+  isResultUnlockedRequest,
+  resultUnlockRequiredResponse,
+} from "@/lib/adminAuth";
+import { writeAuditLog } from "@/lib/auditLog";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
@@ -54,7 +59,12 @@ function increment(map: Map<string, number>, key: string) {
   map.set(key, (map.get(key) ?? 0) + 1);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isResultUnlockedRequest(request)) {
+    await writeAuditLog("results_view_blocked");
+    return resultUnlockRequiredResponse();
+  }
+
   try {
     const [votes, candidates] = await Promise.all([
       prisma.encryptedVote.findMany({
@@ -138,6 +148,12 @@ export async function GET() {
       ),
     }));
 
+    await writeAuditLog("results_viewed", {
+      total_votes: votes.length,
+      valid_votes: votes.length - invalidBallots,
+      invalid_ballots: invalidBallots,
+    });
+
     return NextResponse.json({
       total_votes: votes.length,
       valid_votes: votes.length - invalidBallots,
@@ -146,6 +162,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error(error);
+    await writeAuditLog("results_view_failed");
     return NextResponse.json(
       { error: "Could not calculate results." },
       { status: 500 },

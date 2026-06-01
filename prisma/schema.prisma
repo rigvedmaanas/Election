@@ -26,3 +26,10 @@ model EncryptedVote {
   class_name              String
   encrypted_ballot_string String   // Stored as "IV : Ciphertext : AuthTag"
 }
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  action     String
+  details    String?
+  created_at DateTime @default(now())
+}

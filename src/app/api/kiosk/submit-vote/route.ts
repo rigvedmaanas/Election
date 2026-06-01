@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { writeAuditLog } from "@/lib/auditLog";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     const plaintext = String(ballot ?? "").trim();
 
     if (!/^[^|]+\|[^|]+$/.test(plaintext)) {
+      await writeAuditLog("vote_rejected_invalid_format");
       return NextResponse.json(
         { error: "Ballot must be formatted as MaleName|FemaleName." },
         { status: 400 },
@@ -73,13 +75,17 @@ export async function POST(request: Request) {
       return vote;
     });
 
+    await writeAuditLog("vote_submitted", { vote_id: result.id });
+
     return NextResponse.json({ ok: true, vote_id: result.id });
   } catch (error) {
     if (error instanceof Error && error.message === "KIOSK_LOCKED") {
+      await writeAuditLog("vote_rejected_kiosk_locked");
       return NextResponse.json({ error: "Kiosk is locked." }, { status: 423 });
     }
 
     console.error(error);
+    await writeAuditLog("vote_submit_failed");
     return NextResponse.json(
       { error: "Could not submit vote." },
       { status: 500 },

@@ -67,6 +67,9 @@ export default function AdminPage() {
           <Link href="/admin/results">
             <Button variant="outline">Results</Button>
           </Link>
+          <Link href="/admin/logs">
+            <Button variant="outline">Logs</Button>
+          </Link>
           <AdminLogoutButton />
         </div>
 
