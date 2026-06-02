@@ -1,28 +1,24 @@
 import { prisma } from "@/lib/prisma";
+import { schoolClasses } from "@/lib/classes";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const state = await prisma.kioskState.upsert({
-      where: { id: 1 },
-      update: {},
-      create: {
-        id: 1,
-        status: "LOCKED",
-        active_class: null,
-      },
+    const { searchParams } = new URL(request.url);
+    const className = String(searchParams.get("class_name") ?? "").trim();
+
+    if (!schoolClasses.includes(className)) {
+      return NextResponse.json({ error: "Invalid class." }, { status: 400 });
+    }
+
+    const candidates = await prisma.candidate.findMany({
+      where: { class_name: className },
+      orderBy: [{ gender: "asc" }, { name: "asc" }],
     });
 
-    const candidates = state.active_class
-      ? await prisma.candidate.findMany({
-          where: { class_name: state.active_class },
-          orderBy: [{ gender: "asc" }, { name: "asc" }],
-        })
-      : [];
-
-    return NextResponse.json({ state, candidates });
+    return NextResponse.json({ class_name: className, candidates });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

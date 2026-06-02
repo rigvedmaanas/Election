@@ -3,7 +3,7 @@
 import { Button, Card, Link } from "@heroui/react";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import { HeroSelect } from "@/components/HeroSelect";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type CandidateResult = {
   name: string;
@@ -65,12 +65,8 @@ function CandidateTable({
 export default function ResultsPage() {
   const [payload, setPayload] = useState<ResultsPayload | null>(null);
   const [selectedClass, setSelectedClass] = useState("All Classes");
-  const [keyOne, setKeyOne] = useState("");
-  const [keyTwo, setKeyTwo] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [needsResultsUnlock, setNeedsResultsUnlock] = useState(false);
-  const [isUnlocking, setIsUnlocking] = useState(false);
 
   async function loadResults() {
     setIsLoading(true);
@@ -80,52 +76,15 @@ export default function ResultsPage() {
       const response = await fetch("/api/admin/results", { cache: "no-store" });
       const data = await response.json();
 
-      if (response.status === 403) {
-        setNeedsResultsUnlock(true);
-        setPayload(null);
-        return;
-      }
-
       if (!response.ok) {
         throw new Error(data.error ?? "Could not load results.");
       }
 
       setPayload(data);
-      setNeedsResultsUnlock(false);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not load results.");
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function unlockResults(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsUnlocking(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/admin/results/unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyOne, keyTwo }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error ?? "Could not unlock results.");
-      }
-
-      setKeyOne("");
-      setKeyTwo("");
-      setNeedsResultsUnlock(false);
-      await loadResults();
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not unlock results.",
-      );
-    } finally {
-      setIsUnlocking(false);
     }
   }
 
@@ -212,45 +171,7 @@ export default function ResultsPage() {
           </p>
         ) : null}
 
-        {needsResultsUnlock ? (
-          <Card className="max-w-2xl">
-            <Card.Header className="flex-col items-start gap-1">
-              <Card.Title>Two-Key Result Unlock</Card.Title>
-              <Card.Description>
-                Enter both result keys to decrypt and count ballots.
-              </Card.Description>
-            </Card.Header>
-            <Card.Content>
-              <form className="flex flex-col gap-5" onSubmit={unlockResults}>
-                <label className="flex flex-col gap-2 text-sm font-medium text-[#34302a]">
-                  Result key 1
-                  <input
-                    required
-                    className="h-11 rounded-md border border-[#d8d2c4] bg-white px-3 text-base outline-none transition focus:border-[#1f3f3a] focus:ring-4 focus:ring-[#1f3f3a]/15"
-                    type="password"
-                    value={keyOne}
-                    onChange={(event) => setKeyOne(event.target.value)}
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-sm font-medium text-[#34302a]">
-                  Result key 2
-                  <input
-                    required
-                    className="h-11 rounded-md border border-[#d8d2c4] bg-white px-3 text-base outline-none transition focus:border-[#1f3f3a] focus:ring-4 focus:ring-[#1f3f3a]/15"
-                    type="password"
-                    value={keyTwo}
-                    onChange={(event) => setKeyTwo(event.target.value)}
-                  />
-                </label>
-                <Button type="submit" isDisabled={isUnlocking}>
-                  {isUnlocking ? "Unlocking..." : "Unlock Results"}
-                </Button>
-              </form>
-            </Card.Content>
-          </Card>
-        ) : null}
-
-        {!needsResultsUnlock && visibleResults.length ? (
+        {visibleResults.length ? (
           visibleResults.map((classResult) => (
             <Card key={classResult.class_name}>
               <Card.Header className="flex-row items-center justify-between gap-3">
@@ -271,7 +192,7 @@ export default function ResultsPage() {
               </Card.Content>
             </Card>
           ))
-        ) : !needsResultsUnlock ? (
+        ) : (
           <Card>
             <Card.Content>
               <p className="text-sm text-[#706b61]">
@@ -279,7 +200,7 @@ export default function ResultsPage() {
               </p>
             </Card.Content>
           </Card>
-        ) : null}
+        )}
       </section>
     </main>
   );

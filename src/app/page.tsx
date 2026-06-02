@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, Link } from "@heroui/react";
+import { classToSlug, schoolClasses } from "@/lib/classes";
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
             </Card.Header>
             <Card.Content className="gap-4">
               <p className="text-sm text-default-600">
-                Unlock the kiosk for a class or trigger the emergency lock.
+                Manage candidates, results, logs, and class voting links.
               </p>
               <Link href="/admin" className="w-fit">
                 <Button>Open Dashboard</Button>
@@ -43,14 +44,14 @@ export default function Home() {
           </Card>
           <Card>
             <Card.Header>
-              <Card.Title>Kiosk</Card.Title>
+              <Card.Title>Class Links</Card.Title>
             </Card.Header>
             <Card.Content className="gap-4">
               <p className="text-sm text-default-600">
-                Full-screen voting terminal for students.
+                Launch a separate voting terminal for each class.
               </p>
               <Link href="/kiosk" className="w-fit">
-                <Button variant="tertiary">Launch Kiosk</Button>
+                <Button variant="tertiary">View Links</Button>
               </Link>
             </Card.Content>
           </Card>
@@ -68,6 +69,20 @@ export default function Home() {
             </Card.Content>
           </Card>
         </div>
+        <Card>
+          <Card.Header>
+            <Card.Title>Direct Class Voting URLs</Card.Title>
+          </Card.Header>
+          <Card.Content>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {schoolClasses.map((className) => (
+                <Link key={className} href={`/${classToSlug(className)}`}>
+                  {`/${classToSlug(className)}`}
+                </Link>
+              ))}
+            </div>
+          </Card.Content>
+        </Card>
       </section>
     </main>
   );

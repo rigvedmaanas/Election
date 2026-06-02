@@ -7,12 +7,6 @@ datasource db {
   url      = "file:./election.db"
 }
 
-model KioskState {
-  id           Int     @id @default(1)
-  status       String  @default("LOCKED") // "LOCKED" or "UNLOCKED"
-  active_class String? // e.g., "Class 9A"
-}
-
 model Candidate {
   id         Int    @id @default(autoincrement())
   name       String

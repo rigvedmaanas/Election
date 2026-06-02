@@ -1,54 +1,10 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  Link,
-} from "@heroui/react";
-import { HeroSelect } from "@/components/HeroSelect";
-import { schoolClasses } from "@/lib/classes";
-import { useState } from "react";
+import { Button, Card, Link } from "@heroui/react";
+import { classToSlug, schoolClasses } from "@/lib/classes";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 
 export default function AdminPage() {
-  const [selectedClass, setSelectedClass] = useState("Class 9A");
-  const [message, setMessage] = useState("");
-  const [isBusy, setIsBusy] = useState(false);
-
-  async function updateKiosk(status: "LOCKED" | "UNLOCKED") {
-    setIsBusy(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/kiosk/update-state", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status,
-          active_class: status === "UNLOCKED" ? selectedClass : null,
-        }),
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Kiosk update failed.");
-      }
-
-      setMessage(
-        status === "UNLOCKED"
-          ? `Kiosk unlocked for ${selectedClass}.`
-          : "Kiosk locked and active class cleared.",
-      );
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Kiosk update failed.",
-      );
-    } finally {
-      setIsBusy(false);
-    }
-  }
-
   return (
     <main className="min-h-screen bg-[#f6f4ef] px-5 py-8">
       <section className="mx-auto flex max-w-5xl flex-col gap-5">
@@ -58,7 +14,7 @@ export default function AdminPage() {
               Admin Control
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-[#171717]">
-              Kiosk Dashboard
+              Class Voting Links
             </h1>
           </div>
           <Link href="/admin/candidates">
@@ -70,51 +26,40 @@ export default function AdminPage() {
           <Link href="/admin/logs">
             <Button variant="outline">Logs</Button>
           </Link>
+          <Link href="/admin/advanced">
+            <Button variant="danger-soft">Advanced</Button>
+          </Link>
           <AdminLogoutButton />
         </div>
 
-        <Card className="max-w-2xl">
+        <Card>
           <Card.Header className="flex-col items-start gap-1">
-            <Card.Title>Session Control</Card.Title>
+            <Card.Title>Voting URLs</Card.Title>
             <Card.Description>
-              Select the class currently allowed to vote.
+              Each class has its own local voting terminal URL.
             </Card.Description>
           </Card.Header>
-          <Card.Content className="gap-5">
-            <HeroSelect
-              label="Active class"
-              options={schoolClasses}
-              value={selectedClass}
-              onChange={setSelectedClass}
-            />
+          <Card.Content>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {schoolClasses.map((className) => {
+                const href = `/${classToSlug(className)}`;
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                isDisabled={isBusy}
-                onPress={() => updateKiosk("UNLOCKED")}
-              >
-                {isBusy ? "Working..." : "Unlock Kiosk"}
-              </Button>
-              <Button
-                variant="danger-soft"
-                isDisabled={isBusy}
-                onPress={() => updateKiosk("LOCKED")}
-              >
-                Emergency Lock
-              </Button>
-              <Link href="/kiosk">
-                <Button variant="outline">Open Kiosk</Button>
-              </Link>
-              <Link href="/admin/results">
-                <Button variant="secondary">View Results</Button>
-              </Link>
+                return (
+                  <div
+                    key={className}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-[#ddd6c8] bg-white px-4 py-3"
+                  >
+                    <div>
+                      <p className="font-semibold text-[#171717]">{className}</p>
+                      <p className="text-sm text-[#706b61]">{href}</p>
+                    </div>
+                    <Link href={href}>
+                      <Button variant="outline">Open</Button>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
-
-            {message ? (
-              <p className="rounded-lg bg-[#ece8dd] px-4 py-3 text-sm text-[#34302a]">
-                {message}
-              </p>
-            ) : null}
           </Card.Content>
         </Card>
       </section>

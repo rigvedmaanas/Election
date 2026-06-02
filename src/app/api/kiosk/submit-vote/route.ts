@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/auditLog";
+import { schoolClasses } from "@/lib/classes";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
@@ -29,61 +30,38 @@ function encryptBallot(plaintext: string) {
 
 export async function POST(request: Request) {
   try {
-    const { ballot } = await request.json();
+    const { ballot, class_name: classNameValue } = await request.json();
     const plaintext = String(ballot ?? "").trim();
+    const className = String(classNameValue ?? "").trim();
+
+    if (!schoolClasses.includes(className)) {
+      await writeAuditLog("vote_rejected_invalid_class", { class_name: className });
+      return NextResponse.json({ error: "Invalid class." }, { status: 400 });
+    }
 
     if (!/^[^|]+\|[^|]+$/.test(plaintext)) {
-      await writeAuditLog("vote_rejected_invalid_format");
+      await writeAuditLog("vote_rejected_invalid_format", { class_name: className });
       return NextResponse.json(
         { error: "Ballot must be formatted as MaleName|FemaleName." },
         { status: 400 },
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const state = await tx.kioskState.upsert({
-        where: { id: 1 },
-        update: {},
-        create: {
-          id: 1,
-          status: "LOCKED",
-          active_class: null,
-        },
-      });
-
-      if (state.status !== "UNLOCKED" || !state.active_class) {
-        throw new Error("KIOSK_LOCKED");
-      }
-
-      const encryptedBallot = encryptBallot(plaintext);
-
-      const vote = await tx.encryptedVote.create({
-        data: {
-          class_name: state.active_class,
-          encrypted_ballot_string: encryptedBallot,
-        },
-      });
-
-      await tx.kioskState.update({
-        where: { id: 1 },
-        data: {
-          status: "LOCKED",
-          active_class: null,
-        },
-      });
-
-      return vote;
+    const encryptedBallot = encryptBallot(plaintext);
+    const result = await prisma.encryptedVote.create({
+      data: {
+        class_name: className,
+        encrypted_ballot_string: encryptedBallot,
+      },
     });
 
-    await writeAuditLog("vote_submitted", { vote_id: result.id });
+    await writeAuditLog("vote_submitted", {
+      vote_id: result.id,
+      class_name: result.class_name,
+    });
 
     return NextResponse.json({ ok: true, vote_id: result.id });
   } catch (error) {
-    if (error instanceof Error && error.message === "KIOSK_LOCKED") {
-      await writeAuditLog("vote_rejected_kiosk_locked");
-      return NextResponse.json({ error: "Kiosk is locked." }, { status: 423 });
-    }
-
     console.error(error);
     await writeAuditLog("vote_submit_failed");
     return NextResponse.json(

@@ -1,8 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import {
-  isResultUnlockedRequest,
-  resultUnlockRequiredResponse,
-} from "@/lib/adminAuth";
 import { writeAuditLog } from "@/lib/auditLog";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
@@ -59,12 +55,7 @@ function increment(map: Map<string, number>, key: string) {
   map.set(key, (map.get(key) ?? 0) + 1);
 }
 
-export async function GET(request: Request) {
-  if (!isResultUnlockedRequest(request)) {
-    await writeAuditLog("results_view_blocked");
-    return resultUnlockRequiredResponse();
-  }
-
+export async function GET() {
   try {
     const [votes, candidates] = await Promise.all([
       prisma.encryptedVote.findMany({
