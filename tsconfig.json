@@ -19,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@heroui/react": ["./vendor/node_modules/@heroui/react"],
-      "@heroui/styles": ["./vendor/node_modules/@heroui/styles/dist/index.d.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

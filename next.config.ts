@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@heroui/react": path.resolve(__dirname, "vendor/node_modules/@heroui/react"),
+      "@heroui/react": path.resolve(__dirname, "/node_modules/@heroui/react"),
       "@heroui/styles$": path.resolve(
         __dirname,
-        "vendor/node_modules/@heroui/styles/dist/index.js",
+        "/node_modules/@heroui/styles/dist/index.js",
       ),
     };
 
