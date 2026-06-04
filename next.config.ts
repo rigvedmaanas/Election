@@ -3,6 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
+  devIndicators: false,
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
