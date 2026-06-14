@@ -28,11 +28,8 @@ npm -v # Should print "11.13.0".
 ```
 DATABASE_URL="file:./election.db"
 VOTE_ENCRYPTION_SECRET="12345678901234567890123456789012"
-ADMIN_PASSWORD_SHA256="240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"
-ADMIN_SESSION_SECRET="change-this-admin-session-secret"
-RESULT_KEY_ONE_SHA256="6eac1114aa783f6549327e7d01f63752995da7b31f1f37092b7dcb9f49cf5651"
-RESULT_KEY_TWO_SHA256="149d2937d1bce53fa683ae652291bd54cc8754444216a9e278b45776b76375af"
-RESULT_SESSION_SECRET="change-this-result-session-secret"
+ADMIN_PASSWORD_SHA256="a020df4781afe008947d8390b74d0c84a4757ebf7548c078e942436433c32afb"
+ADMIN_SESSION_SECRET="d718c16108328a234511f93f9a01633a0bb96c5fd90e620defa3b43ad8698190"
 ```
 
 Default passswords:
@@ -41,14 +38,6 @@ pwd1
 pwd2
 
 3. `npm i`
-4. `npm run dev`
+4. `npm run prisma:generate`
+5. `npm run dev -- -H 0.0.0.0`
 
-## Erase database
-
-That clears all candidates and votes, and locks the kiosk.
-
-`sqlite3 prisma/election.db "DELETE FROM EncryptedVote; DELETE FROM Candidate; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"`
-
-If you only want to clear votes/results but keep candidates:
-
-`sqlite3 prisma/election.db "DELETE FROM EncryptedVote; UPDATE KioskState SET status = 'LOCKED', active_class = NULL WHERE id = 1;"`
